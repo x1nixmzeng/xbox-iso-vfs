@@ -1,0 +1,17 @@
+image:
+- Visual Studio 2019
+configuration:
+- Release
+before_build:
+- cmd: |-
+    mkdir build
+    cd build
+    cmake .. -G "Visual Studio 16 2019"
+build:
+  project: c:\projects\xbox-iso-vfs\build\xbox-iso-vfs.sln
+after_build:
+- cmd: |-
+    cd %CONFIGURATION%
+    7z u %APPVEYOR_BUILD_FOLDER%\export\%CONFIGURATION%.zip xbox-iso-vfs.exe
+artifacts:
+- path: export/*.zip
