@@ -131,7 +131,7 @@ public:
     std::wcout
         << "xbox-iso-vfs is a utility to mount Xbox ISO files on Windows\n";
     std::wcout << "Written by x1nixmzeng\n\n";
-    std::wcout << "xbox-iso-vfs.exe [/d|/l] <iso_file> <mount_path>\n";
+    std::wcout << "xbox-iso-vfs.exe [/d] <iso_file> <mount_path>\n";
     std::wcout
         << "  /d           Display debug Dokan output in console window\n";
     // std::wcout << "  /l           Launch the mount path when successful\n";
@@ -153,12 +153,14 @@ public:
         return false;
       } else if (arg == L"--debug" || arg == L"/d") {
         params.debugMode = true;
+        continue;
       }
       // else if (arg == L"--launch" || arg == L"/l") {
       //	params.launchMountPath = true;
       //}
       else if (i + 1 >= argc) {
-        showUsage();
+        std::wcout << "Missing mount_path parameter. Use --help to see usage\n";
+        return false;
       }
 
       params.filePath = arg;
@@ -167,7 +169,7 @@ public:
     }
 
     if (params.filePath.empty()) {
-      showUsage();
+      std::wcout << "Missing iso_file parameter. Use --help to see usage\n";
       return false;
     }
 
@@ -179,7 +181,7 @@ public:
     }
 
     if (params.mountPoint.empty()) {
-      showUsage();
+      std::wcout << "Missing mount_path parameter. Use --help to see usage\n";
       return false;
     }
 
