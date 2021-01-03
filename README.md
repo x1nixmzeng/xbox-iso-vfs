@@ -1,15 +1,19 @@
 # xbox-iso-vfs
 [![Build status](https://ci.appveyor.com/api/projects/status/dp43t000dnga9w3m?svg=true)](https://ci.appveyor.com/project/x1nixmzeng/xbox-iso-vfs)
 
-xbox-iso-vfs is a utility to mount Xbox ISO files on Windows
+xbox-iso-vfs is a utility to mount Xbox ISO files as a file system on Windows
 
-The Dokan library is required for the kernel model file system driver. For more information on Dokan and how it works, see: https://github.com/dokan-dev/dokany#how-it-works
+Note that the Dokan library is required for the kernel model file system driver. For more information on Dokan and how it works, [click here](https://github.com/dokan-dev/dokany#how-it-works).
+
+Once mounted, the files can be
+* Used natively by emulators (such as Cxbx-Reloaded)
+* Used to view or extract files using Windows Explorer
+
+<img width="456" alt="Usage example" src="https://user-images.githubusercontent.com/327967/103487886-76800500-4e00-11eb-8b74-81a3e890a1c1.png">
+
 
 ## Usage
 
-    xbox-iso-vfs is a utility to mount Xbox ISO files on Windows
-    Written by x1nixmzeng
-    
     xbox-iso-vfs.exe [/d|/l] <iso_file> <mount_path>
       /d           Display debug Dokan output in console window
       <iso_file>   Path to the Xbox ISO file to mount
@@ -21,9 +25,9 @@ The Dokan library is required for the kernel model file system driver. For more 
 
 ## Installation
 
-1. Download Dokan v1.4 - [x64 installer](https://github.com/dokan-dev/dokany/releases/download/v1.4.0.1000/Dokan_x64.msi)
+1. Download Dokan v1.4 - [x64](https://github.com/dokan-dev/dokany/releases/download/v1.4.0.1000/Dokan_x64.msi)/[x86](https://github.com/dokan-dev/dokany/releases/download/v1.4.0.1000/Dokan_x86.msi) or [all releases](https://github.com/dokan-dev/dokany/releases/tag/v1.4.0.1000)
 2. Run the Dokan installer
-3. Download the xbox-iso-vfs binary
+3. Download xbox-iso-vfs - [latest version](https://ci.appveyor.com/api/projects/x1nixmzeng/xbox-iso-vfs/artifacts/export/Release.zip?branch=master&pr=false)
 
 
 ## Similar Projects
