@@ -16,6 +16,7 @@ Once mounted, the files can be
 
     xbox-iso-vfs.exe [/d|/l] <iso_file> <mount_path>
       /d           Display debug Dokan output in console window
+      /l           Open Windows Explorer to the mount path
       <iso_file>   Path to the Xbox ISO file to mount
       <mount_path> Driver letter ("M:\") or folder path on NTFS partition
       /h           Show usage
