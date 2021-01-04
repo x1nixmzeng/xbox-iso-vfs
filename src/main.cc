@@ -6,10 +6,12 @@
 #include "vfs.h"
 #include "vfs_operations.h"
 
+#include <chrono>
 #include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <string>
+#include <thread>
 
 template <class T> class Singleton {
 public:
@@ -33,7 +35,7 @@ public:
     std::wstring filePath;
     std::wstring mountPoint;
     bool debugMode{false};
-    // bool launchMountPath{ true };
+    bool launchMountPath{false};
   };
 
   App(const Parameters &params) : m_params(params) {}
@@ -55,6 +57,16 @@ public:
       runDokan();
       break;
     }
+  }
+
+  static void fileWatcher(std::wstring path) {
+    std::filesystem::path mp(path);
+
+    do {
+      std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    } while (std::filesystem::exists(mp) == false);
+
+    ShellExecuteW(0, L"explore", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
   }
 
   void runDokan() {
@@ -81,6 +93,11 @@ public:
     ZeroMemory(&dokanOperations, sizeof(DOKAN_OPERATIONS));
 
     vfs::setup(dokanOperations);
+
+    std::thread watcher;
+    if (m_params.launchMountPath) {
+      watcher = std::thread(fileWatcher, m_params.mountPoint);
+    }
 
     auto status = DokanMain(&dokanOptions, &dokanOperations);
 
@@ -125,16 +142,20 @@ public:
       std::wcout << "Please create an issue on Github with this number\n";
       break;
     }
+
+    if (watcher.joinable()) {
+      watcher.detach();
+    }
   }
 
   static void showUsage() {
     std::wcout
         << "xbox-iso-vfs is a utility to mount Xbox ISO files on Windows\n";
     std::wcout << "Written by x1nixmzeng\n\n";
-    std::wcout << "xbox-iso-vfs.exe [/d] <iso_file> <mount_path>\n";
+    std::wcout << "xbox-iso-vfs.exe [/d|/l] <iso_file> <mount_path>\n";
     std::wcout
         << "  /d           Display debug Dokan output in console window\n";
-    // std::wcout << "  /l           Launch the mount path when successful\n";
+    std::wcout << "  /l           Open Windows Explorer to the mount path\n";
     std::wcout << "  <iso_file>   Path to the Xbox ISO file to mount\n";
     std::wcout << "  <mount_path> Driver letter (\"M:\\\") or folder path on "
                   "NTFS partition\n";
@@ -154,11 +175,10 @@ public:
       } else if (arg == L"--debug" || arg == L"/d") {
         params.debugMode = true;
         continue;
-      }
-      // else if (arg == L"--launch" || arg == L"/l") {
-      //	params.launchMountPath = true;
-      //}
-      else if (i + 1 >= argc) {
+      } else if (arg == L"--launch" || arg == L"/l") {
+        params.launchMountPath = true;
+        continue;
+      } else if (i + 1 >= argc) {
         std::wcout << "Missing mount_path parameter. Use --help to see usage\n";
         return false;
       }
