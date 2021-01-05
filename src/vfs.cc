@@ -19,7 +19,8 @@ SetupState Container::setup(const std::wstring &filename) {
 
   if (!vd.validate()) {
     // Some "dual layer" ISO files will have both a video and game partition
-    constexpr static size_t sc_gamePartitionOffset = 2048 * 32 * 6192;
+    constexpr static size_t sc_gamePartitionOffset =
+        xdvdfs::SECTOR_SIZE * 32 * 6192;
 
     stream->m_offset = sc_gamePartitionOffset;
 
@@ -82,7 +83,6 @@ Container::getFolderList(const std::filesystem::path &path) const {
 }
 
 void Container::build(xdvdfs::Stream &file, xdvdfs::FileEntry &dirent) {
-  // TODO consider std::filesystem::path::preferred_separator
   xdvdfs::FileEntry root("\\");
   auto newHandle = registerFileEntry(root, sc_invalidHandle);
 
@@ -96,17 +96,24 @@ void Container::buildFromTreeRecursive(xdvdfs::Stream &file,
 
   if (dirent.isDirectory()) {
     xdvdfs::FileEntry entry = dirent.getFirstEntry(file);
-    buildFromTreeRecursive(file, entry, newHandle);
+    if (entry.validate()) {
+      buildFromTreeRecursive(file, entry, newHandle);
+    }
   }
 
   if (dirent.hasLeftChild()) {
     xdvdfs::FileEntry entry = dirent.getLeftChild(file);
-    buildFromTreeRecursive(file, entry, parent);
+
+    if (entry.validate()) {
+      buildFromTreeRecursive(file, entry, parent);
+    }
   }
 
   if (dirent.hasRightChild()) {
     xdvdfs::FileEntry entry = dirent.getRightChild(file);
-    buildFromTreeRecursive(file, entry, parent);
+    if (entry.validate()) {
+      buildFromTreeRecursive(file, entry, parent);
+    }
   }
 }
 

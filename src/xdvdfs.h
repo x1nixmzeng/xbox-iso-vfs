@@ -27,13 +27,16 @@ public:
   FileEntry(const FileEntry &other);
   FileEntry(const std::string &name);
 
-  void readFromFile(Stream &file, std::streampos pos, std::streamoff offset);
-  const std::string &getFilename() const;
-  uint32_t getFileSize() const;
+  void readFromFile(Stream &file, std::streampos sector, std::streamoff offset);
 
   // matching dokany api for now
   uint32_t read(Stream &file, void *buffer, uint32_t bufferlength,
                 int64_t offset) const;
+
+  bool validate() const;
+
+  const std::string &getFilename() const;
+  uint32_t getFileSize() const;
 
   uint8_t getAttributes() const { return m_attributes; }
   bool isDirectory() const;
@@ -52,8 +55,8 @@ public:
   static const uint8_t FILE_NORMAL = 0x80;
 
 private:
-  uint16_t m_leftSubTree{0};
-  uint16_t m_rightSubTree{0};
+  uint16_t m_leftSubTree{static_cast<uint16_t>(-1)};
+  uint16_t m_rightSubTree{static_cast<uint16_t>(-1)};
   uint32_t m_startSector{0};
   uint32_t m_fileSize{0};
   uint8_t m_attributes{0};
@@ -66,8 +69,9 @@ class VolumeDescriptor {
 public:
   void readFromFile(Stream &file);
 
-  bool validate();
-  FileEntry getRootDirEntry(Stream &file);
+  bool validate() const;
+
+  FileEntry getRootDirEntry(Stream &file) const;
   uint64_t getCreationTime() const { return m_filetime; }
 
 protected:
