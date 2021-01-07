@@ -7,41 +7,6 @@
 #include <vector>
 
 namespace xdvdfs {
-bool VolumeDescriptor::validate() {
-  if (std::memcmp(m_id1, MAGIC_ID, std::size(m_id1)) != 0) {
-    return false;
-  }
-
-  if (m_rootDirTableSector == 0 || m_rootDirTableSize == 0) {
-    return false;
-  }
-
-  if (std::memcmp(m_id1, MAGIC_ID, std::size(m_id2)) != 0) {
-    return false;
-  }
-
-  return true;
-}
-
-FileEntry::FileEntry(const FileEntry &other)
-    : m_leftSubTree(other.m_leftSubTree), m_rightSubTree(other.m_rightSubTree),
-      m_startSector(other.m_startSector), m_fileSize(other.m_fileSize),
-      m_attributes(other.m_attributes), m_filename(other.m_filename),
-      m_sectorNumber(other.m_sectorNumber) {}
-
-FileEntry::FileEntry(const std::string &name)
-    : m_leftSubTree(0), m_rightSubTree(0), m_startSector(0), m_fileSize(0),
-      m_attributes(FileEntry::FILE_DIRECTORY), m_filename(name),
-      m_sectorNumber(0) {}
-
-FileEntry VolumeDescriptor::getRootDirEntry(Stream &file) {
-  FileEntry dirent;
-
-  dirent.readFromFile(file, m_rootDirTableSector, 0);
-
-  return dirent;
-}
-
 void VolumeDescriptor::readFromFile(Stream &file) {
   std::vector<char> buffer(SECTOR_SIZE);
 
@@ -62,9 +27,43 @@ void VolumeDescriptor::readFromFile(Stream &file) {
             reinterpret_cast<char *>(&m_filetime));
   std::copy(buffer.begin() + 0x7EC, buffer.end(), m_id2);
 }
+
+bool VolumeDescriptor::validate() const {
+  if (std::memcmp(m_id1, MAGIC_ID, std::size(m_id1)) != 0) {
+    return false;
+  }
+
+  if (m_rootDirTableSector == 0 || m_rootDirTableSize == 0) {
+    return false;
+  }
+
+  if (std::memcmp(m_id1, MAGIC_ID, std::size(m_id2)) != 0) {
+    return false;
+  }
+
+  return true;
+}
+
+FileEntry VolumeDescriptor::getRootDirEntry(Stream &file) const {
+  FileEntry dirent;
+
+  dirent.readFromFile(file, m_rootDirTableSector, 0);
+
+  return dirent;
+}
 } // namespace xdvdfs
 
 namespace xdvdfs {
+
+FileEntry::FileEntry(const FileEntry &other)
+    : m_leftSubTree(other.m_leftSubTree), m_rightSubTree(other.m_rightSubTree),
+      m_startSector(other.m_startSector), m_fileSize(other.m_fileSize),
+      m_attributes(other.m_attributes), m_filename(other.m_filename),
+      m_sectorNumber(other.m_sectorNumber) {}
+
+FileEntry::FileEntry(const std::string &name)
+    : m_attributes(FileEntry::FILE_DIRECTORY), m_filename(name) {}
+
 void FileEntry::readFromFile(Stream &file, std::streampos sector,
                              std::streamoff offset) {
   std::vector<char> buffer(SECTOR_SIZE);
@@ -77,6 +76,8 @@ void FileEntry::readFromFile(Stream &file, std::streampos sector,
     file.m_file.read(buffer.data(), buffer.size());
   }
 
+  m_sectorNumber = sector;
+
   std::copy(buffer.begin(), buffer.begin() + 0x02,
             reinterpret_cast<char *>(&m_leftSubTree));
   std::copy(buffer.begin() + 0x02, buffer.begin() + 0x04,
@@ -88,10 +89,11 @@ void FileEntry::readFromFile(Stream &file, std::streampos sector,
   std::copy(buffer.begin() + 0x0C, buffer.begin() + 0x0D,
             reinterpret_cast<char *>(&m_attributes));
 
-  size_t filenameLength = buffer[0x0D];
-  m_filename = std::string(&buffer[0x0E], filenameLength);
+  if (validate()) {
+    size_t filenameLength{static_cast<uint8_t>(buffer[0x0D])};
 
-  m_sectorNumber = sector;
+    m_filename = std::string(&buffer[0x0E], filenameLength);
+  }
 }
 
 const std::string &FileEntry::getFilename() const { return m_filename; }
@@ -126,6 +128,22 @@ uint32_t FileEntry::read(Stream &file, void *buffer, uint32_t bufferlength,
   }
 
   return 0;
+}
+
+bool FileEntry::validate() const {
+  if (m_leftSubTree == static_cast<uint16_t>(-1)) {
+    return false;
+  }
+
+  if (m_rightSubTree == static_cast<uint16_t>(-1)) {
+    return false;
+  }
+
+  if (m_startSector == static_cast<uint32_t>(-1)) {
+    return false;
+  }
+
+  return true;
 }
 
 bool FileEntry::isDirectory() const {
