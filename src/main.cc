@@ -60,11 +60,13 @@ public:
   }
 
   static void fileWatcher(std::wstring path) {
+
     std::filesystem::path mp(path);
+    std::error_code errorCode;
 
     do {
       std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    } while (std::filesystem::exists(mp) == false);
+    } while (std::filesystem::exists(mp, errorCode) == false);
 
     ShellExecuteW(0, L"explore", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
   }
@@ -193,7 +195,8 @@ public:
       return false;
     }
 
-    if (std::filesystem::exists(params.filePath) == false) {
+    std::error_code errorCode;
+    if (std::filesystem::exists(params.filePath, errorCode) == false) {
       std::wcout << "The file " << params.filePath << " does not exist\n";
       std::wcout
           << "This parameter should be a path to an existing Xbox ISO file\n";
@@ -205,7 +208,7 @@ public:
       return false;
     }
 
-    if (std::filesystem::exists(params.mountPoint)) {
+    if (std::filesystem::exists(params.mountPoint, errorCode)) {
       std::wcout << "The mount path or driver letter " << params.mountPoint
                  << " already exists\n";
       std::wcout << "This parameter should be a target path or drive used for "
