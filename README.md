@@ -28,7 +28,7 @@ Once mounted, the files can be
 
 1. Download Dokan v1.4 - [x64](https://github.com/dokan-dev/dokany/releases/download/v1.4.0.1000/Dokan_x64.msi)/[x86](https://github.com/dokan-dev/dokany/releases/download/v1.4.0.1000/Dokan_x86.msi) or [all releases](https://github.com/dokan-dev/dokany/releases/tag/v1.4.0.1000)
 2. Run the Dokan installer
-3. Download xbox-iso-vfs - [latest version](https://ci.appveyor.com/api/projects/x1nixmzeng/xbox-iso-vfs/artifacts/export/Release.zip?branch=master&pr=false)
+3. Download xbox-iso-vfs - [latest version](https://github.com/x1nixmzeng/xbox-iso-vfs/releases/download/v1.1/Release.zip)
 
 
 ## Similar Projects
