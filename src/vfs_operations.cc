@@ -203,12 +203,6 @@ static NTSTATUS DOKAN_CALLBACK vfs_findfiles(LPCWSTR filename,
   return STATUS_SUCCESS;
 }
 
-static NTSTATUS DOKAN_CALLBACK vfs_findfileswithpattern(LPCWSTR, LPCWSTR,
-                                                        PFillFindData,
-                                                        PDOKAN_FILE_INFO) {
-  return STATUS_NOT_IMPLEMENTED;
-}
-
 static NTSTATUS DOKAN_CALLBACK vfs_getdiskfreespace(
     PULONGLONG free_bytes_available, PULONGLONG total_number_of_bytes,
     PULONGLONG total_number_of_free_bytes, PDOKAN_FILE_INFO dokanfileinfo) {
@@ -247,7 +241,6 @@ void setup(DOKAN_OPERATIONS &dokanOperations) {
   dokanOperations.ReadFile = vfs_readfile;
   dokanOperations.GetFileInformation = vfs_getfileInformation;
   dokanOperations.FindFiles = vfs_findfiles;
-  dokanOperations.FindFilesWithPattern = vfs_findfileswithpattern;
   dokanOperations.GetDiskFreeSpace = vfs_getdiskfreespace;
   dokanOperations.GetVolumeInformation = vfs_getvolumeinformation;
 }
