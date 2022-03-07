@@ -72,12 +72,14 @@ public:
   }
 
   void runDokan() {
+
+    DokanInit();
+
     DOKAN_OPTIONS dokanOptions;
     ZeroMemory(&dokanOptions, sizeof(DOKAN_OPTIONS));
 
     dokanOptions.Version = DOKAN_VERSION;
-    // Use default thread count
-    dokanOptions.ThreadCount = 0;
+    dokanOptions.SingleThread = FALSE;
     dokanOptions.Timeout = 0;
     dokanOptions.GlobalContext = reinterpret_cast<ULONG64>(&m_vfsContainer);
     dokanOptions.MountPoint = m_params.mountPoint.c_str();
@@ -144,6 +146,8 @@ public:
       std::wcout << "Please create an issue on Github with this number\n";
       break;
     }
+
+    DokanShutdown();
 
     if (watcher.joinable()) {
       watcher.detach();

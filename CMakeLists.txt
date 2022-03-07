@@ -21,6 +21,7 @@ set(HEADER_FILES
 
 include_directories("${DOKAN_ROOT}/include")
 
-add_executable(xbox-iso-vfs "${SOURCE_FILES}")
+add_executable(xbox-iso-vfs "${SOURCE_FILES}" "${HEADER_FILES}")
 
-target_link_libraries(xbox-iso-vfs "${DOKAN_ROOT}/lib/dokan1.lib")
+target_link_libraries(xbox-iso-vfs "${DOKAN_ROOT}/lib/dokan2.lib")
+
